@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04, ubuntu-26.04, ubuntu-22.04-arm, ubuntu-24.04-arm, ubuntu-26.04-arm, macos-15-intel, macos-14 ]
-        ruby: []
+        os: [ ubuntu-26.04, ubuntu-26.04-arm ]
+        ruby: [ ruby-1.9.3-p551, ruby-2.0.0-p648, ruby-2.1.9, ruby-2.2.10, ruby-2.3.8, ruby-2.4.10, ruby-2.5.9, ruby-2.6.10, ruby-2.7.8, ruby-3.0.7, ruby-3.1.7, ruby-3.2.11, ruby-3.3.11, ruby-3.4.9, ruby-4.0.5 ]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v6
@@ -82,6 +82,12 @@ jobs:
     - name: Set warnflags for Ruby <= 2.2
       run: echo "warnflags=-Wno-error=implicit-function-declaration" >> $GITHUB_ENV
       if: startsWith(steps.ruby.outputs.ruby, 'ruby-1.9') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.0') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.1') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.2') || steps.ruby.outputs.ruby == 'ruby-2.6.7'
+
+    # GCC 15 defaults to gnu23
+    # See https://github.com/rbenv/ruby-build/discussions/2529#discussioncomment-13559381
+    - name: Set CFLAGS for Ruby <= 3.1
+      run: echo "CFLAGS=-std=gnu17" >> $GITHUB_ENV
+      if: startsWith(matrix.os, 'ubuntu-26.04') && (startsWith(steps.ruby.outputs.ruby, 'ruby-1.9') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.0') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.1') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.2') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.3')|| startsWith(steps.ruby.outputs.ruby, 'ruby-2.4') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.5')|| startsWith(steps.ruby.outputs.ruby, 'ruby-2.6')|| startsWith(steps.ruby.outputs.ruby, 'ruby-2.7')|| startsWith(steps.ruby.outputs.ruby, 'ruby-3.0')|| startsWith(steps.ruby.outputs.ruby, 'ruby-3.1'))
 
     - name: Set RUBY_CONFIGURE_OPTS
       run: echo 'RUBY_CONFIGURE_OPTS=--enable-shared --disable-install-doc' >> $GITHUB_ENV
