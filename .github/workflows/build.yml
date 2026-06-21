@@ -98,7 +98,7 @@ jobs:
     # https://github.com/ruby/ruby/commit/1922e6ad65b7a458eeeb84da9f07724b0f1c1145
     - name: Disable MJIT for Ruby 2.6 on ubuntu-26-04
       run: echo 'RUBY_CONFIGURE_OPTS=--disable-jit-support --enable-shared --disable-install-doc' >> $GITHUB_ENV
-      if: startsWith(matrix.os, 'ubuntu-26.04') && startsWith(steps.ruby.outputs.ruby, 'ruby-2.6'
+      if: startsWith(matrix.os, 'ubuntu-26.04') && startsWith(steps.ruby.outputs.ruby, 'ruby-2.6')
 
     - name: Build Ruby
       run: ruby-build --verbose ${{ steps.ruby.outputs.ruby }} $PREFIX
