@@ -85,7 +85,7 @@ jobs:
     # See https://github.com/rbenv/ruby-build/discussions/2529#discussioncomment-13559381
     # Wno-error=incompatible-pointer-types is only required for Ruby 2.6
     - name: Set CFLAGS for Ruby <= 3.1 on ubuntu-26-04
-      run: echo "CFLAGS=-std=gnu17 -Wno-error=incompatible-pointer-types" >> $GITHUB_ENV
+      run: echo "RUBY_CFLAGS=-std=gnu17 -Wno-error=incompatible-pointer-types" >> $GITHUB_ENV
       if: startsWith(matrix.os, 'ubuntu-26.04') && (startsWith(steps.ruby.outputs.ruby, 'ruby-1.9') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.0') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.1') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.2') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.3')|| startsWith(steps.ruby.outputs.ruby, 'ruby-2.4') || startsWith(steps.ruby.outputs.ruby, 'ruby-2.5')|| startsWith(steps.ruby.outputs.ruby, 'ruby-2.6')|| startsWith(steps.ruby.outputs.ruby, 'ruby-2.7')|| startsWith(steps.ruby.outputs.ruby, 'ruby-3.0')|| startsWith(steps.ruby.outputs.ruby, 'ruby-3.1'))
 
     - name: Set RUBY_CONFIGURE_OPTS
