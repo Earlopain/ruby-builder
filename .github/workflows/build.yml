@@ -91,7 +91,12 @@ jobs:
     - name: Build Ruby
       run: |
         ruby="${{ steps.ruby.outputs.ruby }}"
-        ruby-build --patch --verbose "$ruby" "$PREFIX" < std23.patch
+        if [[ "${{ matrix.os }}" == ubuntu-26.04* ]] &&
+           [[ "$ruby" == ruby-2.7* || "$ruby" == ruby-3.0* || "$ruby" == ruby-3.1* ]]; then
+          ruby-build --patch --verbose "$ruby" "$PREFIX" < std23.patch
+        else
+          ruby-build --verbose "$ruby" "$PREFIX"
+        fi
       env:
         CPPFLAGS: "-DENABLE_PATH_CHECK=0" # https://github.com/actions/virtual-environments/issues/267
     - name: Create archive

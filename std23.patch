@@ -1,6 +1,6 @@
-commit 025141f0404ce9746999fa6950601eec009c45f5
+commit b50f929bdfaec043e4c4b4acebc05165ab9b15f9
 Author: Earlopain <14981592+Earlopain@users.noreply.github.com>
-Date:   Tue Sep 22 09:34:03 2026 +0200
+Date:   Tue Sep 22 09:41:49 2026 +0200
 
     Fix compile with std23
     
@@ -8,6 +8,7 @@ Date:   Tue Sep 22 09:34:03 2026 +0200
     * https://github.com/ruby/ruby/commit/45741918e1963fce3416b253712cfd4745368e7f
     * https://github.com/ruby/ruby/commit/104069e75a385d9b04c86cd31f2aa60547ad6a55
     * https://github.com/ruby/ruby/pull/6358/changes/2a2fe10ab534bd33e1baaf0d4127c6b1e0d2c064
+    * https://github.com/ruby/ruby/pull/6358/changes/07fb7c19651961ce5ab321f09ba39b0666e8ed0f
 
 diff --git a/enc/jis/props.kwd b/enc/jis/props.kwd
 index 659cf0aff4..734c41f6d3 100644
@@ -57,3 +58,59 @@ index 455e1182e7..74738d8aed 100644
  
  const char ruby_null_device[] =
  #if defined DOSISH
+diff --git a/vm_insnhelper.c b/vm_insnhelper.c
+index 5f03e8daef..b44301cfbb 100644
+--- a/vm_insnhelper.c
++++ b/vm_insnhelper.c
+@@ -1631,11 +1631,40 @@ vm_search_method(struct rb_call_data *cd, VALUE recv)
+     vm_search_method_fastpath(cd, klass);
+ }
+ 
++#if __has_attribute(transparent_union)
++typedef union {
++    VALUE (*anyargs)(ANYARGS);
++    VALUE (*f00)(VALUE);
++    VALUE (*f01)(VALUE, VALUE);
++    VALUE (*f02)(VALUE, VALUE, VALUE);
++    VALUE (*f03)(VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f04)(VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f05)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f06)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f07)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f08)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f09)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f10)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f11)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f12)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f13)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f14)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*f15)(VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE);
++    VALUE (*fm1)(int, union { VALUE *x; const VALUE *y; } __attribute__((__transparent_union__)), VALUE);
++} __attribute__((__transparent_union__)) cfunc_type;
++#else
++typedef VALUE (*cfunc_type)(ANYARGS);
++#endif
++
+ static inline int
+-check_cfunc(const rb_callable_method_entry_t *me, VALUE (*func)())
++check_cfunc(const rb_callable_method_entry_t *me, cfunc_type func)
+ {
+     if (me && me->def->type == VM_METHOD_TYPE_CFUNC &&
+-	me->def->body.cfunc.func == func) {
++#if __has_attribute(transparent_union)
++	me->def->body.cfunc.func == func.anyargs;
++#else
++    me->def->body.cfunc.func == func) {
++#endif
+ 	return 1;
+     }
+     else {
+@@ -1644,7 +1673,7 @@ check_cfunc(const rb_callable_method_entry_t *me, VALUE (*func)())
+ }
+ 
+ static inline int
+-vm_method_cfunc_is(CALL_DATA cd, VALUE recv, VALUE (*func)())
++vm_method_cfunc_is(CALL_DATA cd, VALUE recv, cfunc_type func)
+ {
+     vm_search_method(cd, recv);
+     return check_cfunc(cd->cc.me, func);
