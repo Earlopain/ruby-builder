@@ -1,12 +1,13 @@
-commit 2cc20ca751aedc4248a864171921685a35c0a94a
+commit 025141f0404ce9746999fa6950601eec009c45f5
 Author: Earlopain <14981592+Earlopain@users.noreply.github.com>
-Date:   Tue Sep 22 09:23:47 2026 +0200
+Date:   Tue Sep 22 09:34:03 2026 +0200
 
     Fix compile with std23
     
     From the following commits:
     * https://github.com/ruby/ruby/commit/45741918e1963fce3416b253712cfd4745368e7f
     * https://github.com/ruby/ruby/commit/104069e75a385d9b04c86cd31f2aa60547ad6a55
+    * https://github.com/ruby/ruby/pull/6358/changes/2a2fe10ab534bd33e1baaf0d4127c6b1e0d2c064
 
 diff --git a/enc/jis/props.kwd b/enc/jis/props.kwd
 index 659cf0aff4..734c41f6d3 100644
@@ -35,3 +36,24 @@ index c29e90244a..1624df6d9d 100644
      const char *err;
      VALUE mesg, error, func, errmsg;
      VALUE klass = rb_obj_class(self);
+diff --git a/file.c b/file.c
+index 455e1182e7..74738d8aed 100644
+--- a/file.c
++++ b/file.c
+@@ -6440,12 +6440,10 @@ rb_find_file(VALUE path)
+     return copy_path_class(tmp, path);
+ }
+ 
+-static void
+-define_filetest_function(const char *name, VALUE (*func)(ANYARGS), int argc)
+-{
+-    rb_define_module_function(rb_mFileTest, name, func, argc);
+-    rb_define_singleton_method(rb_cFile, name, func, argc);
+-}
++#define define_filetest_function(name, func, argc) do {        \
++    rb_define_module_function(rb_mFileTest, name, func, argc); \
++    rb_define_singleton_method(rb_cFile, name, func, argc);    \
++} while(false)
+ 
+ const char ruby_null_device[] =
+ #if defined DOSISH
