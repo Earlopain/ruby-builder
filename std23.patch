@@ -1,6 +1,6 @@
-commit b50f929bdfaec043e4c4b4acebc05165ab9b15f9
+commit 6fffd67272ec11de39f6bc0452204895dfd4266d
 Author: Earlopain <14981592+Earlopain@users.noreply.github.com>
-Date:   Tue Sep 22 09:41:49 2026 +0200
+Date:   Tue Sep 22 09:43:19 2026 +0200
 
     Fix compile with std23
     
@@ -59,7 +59,7 @@ index 455e1182e7..74738d8aed 100644
  const char ruby_null_device[] =
  #if defined DOSISH
 diff --git a/vm_insnhelper.c b/vm_insnhelper.c
-index 5f03e8daef..b44301cfbb 100644
+index 5f03e8daef..f229f6e51f 100644
 --- a/vm_insnhelper.c
 +++ b/vm_insnhelper.c
 @@ -1631,11 +1631,40 @@ vm_search_method(struct rb_call_data *cd, VALUE recv)
@@ -98,7 +98,7 @@ index 5f03e8daef..b44301cfbb 100644
      if (me && me->def->type == VM_METHOD_TYPE_CFUNC &&
 -	me->def->body.cfunc.func == func) {
 +#if __has_attribute(transparent_union)
-+	me->def->body.cfunc.func == func.anyargs;
++	me->def->body.cfunc.func == func.anyargs) {
 +#else
 +    me->def->body.cfunc.func == func) {
 +#endif
