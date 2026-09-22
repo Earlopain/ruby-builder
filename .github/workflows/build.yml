@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04, ubuntu-26.04, ubuntu-22.04-arm, ubuntu-24.04-arm, ubuntu-26.04-arm, macos-15-intel, macos-14 ]
-        ruby: [jruby-10.0.7.0, jruby-10.1.2.0]
+        os: [ ubuntu-26.04, ubuntu-26.04-arm ]
+        ruby: [ruby-2.7.8, ruby-3.0.7, ruby-3.1.7, ruby-3.2.11, ruby-3.3.12, ruby-3.4.10, ruby-4.0.7]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v6
@@ -34,8 +34,6 @@ jobs:
         echo "ruby=$ruby" >> $GITHUB_OUTPUT
         echo "tag=$ruby" >> $GITHUB_OUTPUT
         echo "archive=$ruby-${{ steps.platform.outputs.platform }}.tar.gz" >> $GITHUB_OUTPUT
-    - name: Check if already built
-      run: '! curl -s -L --head --fail https://github.com/ruby/ruby-builder/releases/download/${{ steps.ruby.outputs.tag }}/${{ steps.ruby.outputs.archive }}'
 
     - name: Set NO_DOCUMENT
       run: |
@@ -112,14 +110,6 @@ jobs:
     - run: bundle install
     - run: bundle exec rake --version
     - run: ruby test_subprocess.rb
-
-    - name: Upload Built Ruby
-      env:
-        GH_TOKEN: ${{ github.token }}
-        GH_REPO: ${{ github.repository }}
-      run: |
-        gh release view "${{ steps.ruby.outputs.tag }}" || gh release create "${{ steps.ruby.outputs.tag }}" --notes "Builds of ${{ steps.ruby.outputs.ruby }}"
-        gh release upload "${{ steps.ruby.outputs.tag }}" "${{ steps.ruby.outputs.archive }}"
 
   buildJRubyWindows:
     if: true
