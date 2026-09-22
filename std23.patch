@@ -1,0 +1,19 @@
+commit a02e43b7692277df84d282f702b5b249adeb0a27
+Author: Earlopain <14981592+Earlopain@users.noreply.github.com>
+Date:   Tue Sep 22 09:08:56 2026 +0200
+
+    Fix compile with std23
+
+diff --git a/enc/jis/props.kwd b/enc/jis/props.kwd
+index 659cf0aff4..734c41f6d3 100644
+--- a/enc/jis/props.kwd
++++ b/enc/jis/props.kwd
+@@ -37,7 +37,7 @@ struct enc_property {
+     unsigned char ctype;
+ };
+ 
+-static const struct enc_property *onig_jis_property(/*!ANSI{*/const char *str, unsigned int len/*}!ANSI*/);
++static const struct enc_property *onig_jis_property(const char *str, unsigned int len);
+ %}
+ 
+ struct enc_property;
